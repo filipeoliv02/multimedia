@@ -1,7 +1,7 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #if defined(__APPLE__) || defined(MACOSX)
@@ -19,8 +19,8 @@
 #endif
 
 /**************************************
-* AUXILIARES CONVERSÃO GRAUS-RADIANOS *
-**************************************/
+ * AUXILIARES CONVERSÃO GRAUS-RADIANOS *
+ **************************************/
 
 #define rtd(x) (180 * (x) / M_PI)
 #define dtr(x) (M_PI * (x) / 180)
@@ -31,19 +31,16 @@
 ********** VARIÁVEIS GLOBAIS **********
 **************************************/
 
-typedef struct
-{
+typedef struct {
   GLboolean doubleBuffer;
   GLint delay;
 } Estado;
 
-typedef struct
-{
+typedef struct {
   GLint hor, min, seg;
 } Horas;
 
-typedef struct
-{
+typedef struct {
   GLint numLados;
   GLfloat raio;
   GLfloat tamLado;
@@ -57,9 +54,13 @@ Modelo modelo;
 *** INICIALIZAÇÃO DO AMBIENTE OPENGL **
 **************************************/
 
-void init(void)
-{
+void poligono(GLint n, GLfloat x0, GLfloat y0, GLfloat r);
 
+void mostrador(GLint n, GLfloat x0, GLfloat y0, GLfloat r);
+
+void ponteiros(GLint ang, GLfloat x0, GLfloat y0, GLfloat r);
+
+void init(void) {
   struct tm *current_time;
   time_t timer = time(0);
 
@@ -88,8 +89,7 @@ void init(void)
 **************************************/
 
 /* Callback para redimensionar janela */
-void reshape(int width, int height)
-{
+void reshape(int width, int height) {
   GLint size;
 
   if (width < height)
@@ -116,46 +116,43 @@ void reshape(int width, int height)
   glLoadIdentity();
 }
 
-
 /**************************************
 ** ESPAÇO PARA DEFINIÇÃO DAS ROTINAS **
 ****** AUXILIARES DE DESENHO ... ******
 **************************************/
 
-
 /* Callback de desenho */
-void draw(void)
-{
+void draw(void) {
   glClear(GL_COLOR_BUFFER_BIT);
-  
+
   /* Espaço para chamada das rotinas auxiliares de desenho ... */
 
+  /*glColor3f(1.0f, 0.0f, 0.0f);*/
+  /*glVertex2f(modelo.tamLado / 2, modelo.tamLado / 2);*/
+  /*glColor3f(0.0f, 0.0f, 1.0f);*/
+  /*glVertex2f(-modelo.tamLado / 2, modelo.tamLado / 2);*/
+  /*glColor3f(0.0f, 1.0f, 0.0f);*/
+  /*glVertex2f(-modelo.tamLado / 2, -modelo.tamLado / 2);*/
+  /*glColor3f(1.0f, 0.0f, 1.0f);*/
+  /*glVertex2f(modelo.tamLado / 2, -modelo.tamLado / 2);*/
 
-  glBegin(GL_POLYGON);
-    glColor3f(1.0f, 0.0f, 0.0f);
-    glVertex2f(modelo.tamLado / 2, modelo.tamLado / 2);
-    glColor3f(0.0f, 0.0f, 1.0f);
-    glVertex2f(-modelo.tamLado / 2, modelo.tamLado / 2);
-    glColor3f(0.0f, 1.0f, 0.0f);
-    glVertex2f(-modelo.tamLado / 2, -modelo.tamLado / 2);
-    glColor3f(1.0f, 0.0f, 1.0f);
-    glVertex2f(modelo.tamLado / 2, -modelo.tamLado / 2);
-  glEnd();
+  glColor3f(0, 0, 1);
+  // poligono(50,0,0,1);
+
+  mostrador(60, 0, 0, 1);
+  ponteiros(modelo.hora.seg, 0, 0, 1);
 
   glFlush();
 
-  if (estado.doubleBuffer)
-    glutSwapBuffers();
+  if (estado.doubleBuffer) glutSwapBuffers();
 }
-
 
 /**************************************
 ******** CALLBACKS TIME/IDLE **********
 **************************************/
 
 /* Callback Idle */
-void idle(void)
-{
+void idle(void) {
   /* Ações a tomar quando o GLUT está idle */
 
   /* Redesenhar o ecrã */
@@ -163,12 +160,13 @@ void idle(void)
 }
 
 /* Callback de temporizador */
-void timer(int value)
-{
+void timer(int value) {
   glutTimerFunc(estado.delay, timer, 0);
   /* Acções do temporizador ...
      Não colocar aqui primitivas OpenGL de desenho glBegin, glEnd, etc.
-     Simplesmente alterar os valores de modelo.hora.hor, modelo.hora.min e modelo.hora.seg */
+     Simplesmente alterar os valores de modelo.hora.hor, modelo.hora.min e
+     modelo.hora.seg */
+  modelo.hora.seg--;
 
   /* Redesenhar o ecrã (invoca o callback de desenho) */
   glutPostRedisplay();
@@ -178,8 +176,7 @@ void timer(int value)
 *********** FUNÇÃO AJUDA **************
 **************************************/
 
-void imprime_ajuda(void)
-{
+void imprime_ajuda(void) {
   printf("\n\nDesenho de um quadrado\n");
   printf("h,H - Ajuda \n");
   printf("+   - Aumentar tamanho do Lado\n");
@@ -192,49 +189,39 @@ void imprime_ajuda(void)
 **************************************/
 
 /* Callback para interação via teclado (carregar na tecla) */
-void key(unsigned char key, int x, int y)
-{
-  switch (key)
-  {
-  case 27: // Tecla Escape
-    exit(1);
-    /* Ações sobre outras teclas */
+void key(unsigned char key, int x, int y) {
+  switch (key) {
+    case 27:  // Tecla Escape
+      exit(1);
+      /* Ações sobre outras teclas */
 
-  case 'h':
-  case 'H':
-    imprime_ajuda();
-    break;
+    case 'h':
+    case 'H':
+      imprime_ajuda();
+      break;
 
-  case '+':
-    if (modelo.tamLado < 1.8)
-    {
-      modelo.tamLado += 0.05;
-      glutPostRedisplay(); 
-    }
-    break;
-  case '-':
-    if (modelo.tamLado > 0.2)
-    {
-      modelo.tamLado -= 0.05;
-      glutPostRedisplay(); 
-    }
-    break;
+    case '+':
+      estado.delay -= 90;
+      glutPostRedisplay();
+      break;
+    case '-':
+      if (modelo.tamLado > 0.2) {
+        modelo.tamLado -= 0.05;
+        glutPostRedisplay();
+      }
+      break;
   }
 
-  if (DEBUG)
-    printf("Carregou na tecla %c\n", key);
+  if (DEBUG) printf("Carregou na tecla %c\n", key);
 }
 
 /* Callback para interação via teclado (largar a tecla) */
-void keyUp(unsigned char key, int x, int y)
-{
-  if (DEBUG)
-    printf("Largou a tecla %c\n", key);
+void keyUp(unsigned char key, int x, int y) {
+  if (DEBUG) printf("Largou a tecla %c\n", key);
 }
 
 /* Callback para interacção via teclas especiais (carregar na tecla) */
-void specialKey(int key, int x, int y)
-{
+void specialKey(int key, int x, int y) {
   /* Ações sobre outras teclas especiais
       GLUT_KEY_F1 ... GLUT_KEY_F12
       GLUT_KEY_UP
@@ -247,39 +234,78 @@ void specialKey(int key, int x, int y)
       GLUT_KEY_END
       GLUT_KEY_INSERT */
 
-  switch (key)
-  {
+  switch (key) {
     /* Redesenhar o ecrã */
-    //glutPostRedisplay();
+    // glutPostRedisplay();
   }
 
-  if (DEBUG)
-    printf("Carregou na tecla especial %d\n", key);
+  if (DEBUG) printf("Carregou na tecla especial %d\n", key);
 }
 
 /* Callback para interação via teclas especiais (largar a tecla) */
-void specialKeyUp(int key, int x, int y)
-{
-
-  if (DEBUG)
-    printf("Largou a tecla especial %d\n", key);
+void specialKeyUp(int key, int x, int y) {
+  if (DEBUG) printf("Largou a tecla especial %d\n", key);
 }
 
+void poligono(GLint n, GLfloat x0, GLfloat y0, GLfloat r) {
+  glBegin(GL_POLYGON);
+  GLfloat ang = 360.0 / n;
+  GLfloat sumang = 0;
+
+  for (int i = 0; i < n; i++) {
+    GLfloat x1 = r * cos(dtr(sumang)) + x0;
+    GLfloat y1 = r * sin(dtr(sumang)) + y0;
+    glVertex2f(x1, y1);
+    sumang += ang;
+  }
+  glEnd();
+}
+
+void mostrador(GLint n, GLfloat x0, GLfloat y0, GLfloat r) {
+  glBegin(GL_LINES);
+  GLfloat ang = 360.0 / n;
+  GLfloat sumang = 0;
+
+  for (int i = 0; i < n; i++) {
+    GLfloat x1 = r * cos(dtr(sumang)) + x0;
+    GLfloat y1 = r * sin(dtr(sumang)) + y0;
+    GLfloat x2 = r * 0.8 * cos(dtr(sumang)) + x0;
+    GLfloat y2 = r * 0.8 * sin(dtr(sumang)) + y0;
+
+    glVertex2f(x1, y1);
+    glVertex2f(x2, y2);
+    sumang += ang;
+  }
+  glEnd();
+}
+
+void ponteiros(GLint ang, GLfloat x0, GLfloat y0, GLfloat r) {
+  glLineWidth(5.0);
+  glColor3f(0.3, 0.5, 0);
+  glBegin(GL_LINES);
+  glVertex2f(x0, y0);
+  GLfloat x2 = r * 0.8 * cos(dtr(ang)) + x0;
+  GLfloat y2 = r * 0.8 * sin(dtr(ang)) + y0;
+  glVertex2f(x2, y2);
+
+  glEnd();
+
+  glLineWidth(1.0);
+}
 
 /**************************************
 ************ FUNÇÃO MAIN **************
 **************************************/
 
-int main(int argc, char **argv)
-{
-  estado.doubleBuffer = GL_FALSE; // Colocar GL_TRUE para ligar o Double Buffer
+int main(int argc, char **argv) {
+  estado.doubleBuffer = GL_FALSE;  // Colocar GL_TRUE para ligar o Double Buffer
 
   glutInit(&argc, argv);
   glutInitWindowPosition(0, 0);
   glutInitWindowSize(300, 300);
-  glutInitDisplayMode(((estado.doubleBuffer) ? GLUT_DOUBLE : GLUT_SINGLE) | GLUT_RGB);
-  if (glutCreateWindow("Exemplo") == GL_FALSE)
-    exit(1);
+  glutInitDisplayMode(((estado.doubleBuffer) ? GLUT_DOUBLE : GLUT_SINGLE) |
+                      GLUT_RGB);
+  if (glutCreateWindow("Exemplo") == GL_FALSE) exit(1);
 
   init();
 
@@ -293,13 +319,13 @@ int main(int argc, char **argv)
 
   /* Callbacks de teclado */
   glutKeyboardFunc(key);
-  //glutKeyboardUpFunc(keyUp);
-  //glutSpecialFunc(specialKey);
-  //glutSpecialUpFunc(specialKeyUp);
+  // glutKeyboardUpFunc(keyUp);
+  // glutSpecialFunc(specialKey);
+  // glutSpecialUpFunc(specialKeyUp);
 
   /* Callbacks timer/idle */
-  //glutTimerFunc(estado.delay, timer, 0);
-  //glutIdleFunc(idle);
+  glutTimerFunc(estado.delay, timer, 0);
+  // glutIdleFunc(idle);
 
   /* Começar loop */
   glutMainLoop();
